@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    
+    <!-- Configuración para Android / PWA -->
+    <meta name="theme-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="data:application/json;base64,ewogICJnameIjogIlJFREVSQVIiLAogICJzaG9ydF9uYW1lIjogIlJFREVSQVIiLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzAwMDAwMCIsCiAgInRoZW1lX2NvbG9yIjogIiMwMDAwMDAiCn0=">
+    
+    <title>REDERAR - App Oficial</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        body { 
+            background-color: #000000; 
+            margin: 0; 
+            padding: 0; 
+            color: white;
+            font-family: 'Inter', sans-serif, system-ui;
+            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
+        }
+
+        /* Marca con efecto Bandera Argentina y Sol Central */
+        .rederar-container {
+            position: relative;
+            display: flex;
+            justify(content): center;
+            align-items: center;
+            padding: 0 45px; 
+            width: fit-content;
+            margin: 0 auto;
+        }
+
+        .rederar-logo {
+            font-size: 4.5rem;
+            font-weight: 900;
+            font-style: italic;
+            letter-spacing: 0.05em;
+            line-height: 1.1;
+            background: linear-gradient(
+                to bottom, 
+                #74ACDF 0%, 
+                #74ACDF 35%, 
+                #FFFFFF 35%, 
+                #FFFFFF 65%, 
+                #74ACDF 65%, 
+                #74ACDF 100%
+            );
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 12px rgba(116, 172, 223, 0.4));
+            -webkit-text-stroke: 0.5px rgba(255,255,255,0.2);
+            position: relative;
+            z-index: 10;
+            white-space: nowrap;
+        }
+
+        .rederar-sun {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle, #F6B40E 0%, #F6B40E 40%, transparent 70%);
+            border-radius: 50%;
+            z-index: 5;
+            filter: blur(10px);
+            opacity: 0.8;
+        }
+
+        .rederar-sun-core {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 15;
+            margin-top: -2px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .legal-badges {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            text-align: right;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .legal-text {
+            font-size: 7px;
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            line-height: 1.4;
+        }
+
+        .main-card {
+            background: rgba(10, 15, 25, 0.8);
+            border: 1.5px solid rgba(59, 130, 246, 0.15);
+            border-radius: 2.5rem;
+            backdrop-filter: blur(10px);
+        }
+        .inner-card {
+            background: rgba(7, 10, 15, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 1.5rem;
+        }
+        .btn-calc {
+            background: #5849E8;
+            border-radius: 1.2rem;
+            box-shadow: 0 4px 15px rgba(88, 73, 232, 0.3);
+        }
+        .btn-wa {
+            background: #1DB954;
+            border-radius: 1.2rem;
+            box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+        }
+        .glow-text-orange {
+            color: #FF7A00;
+            text-shadow: 0 0 10px rgba(255, 122, 0, 0.3);
+        }
+        .fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        select, input {
+            color-scheme: dark;
+        }
+
+        /* Estilo para el botón de instalación Android */
+        .install-prompt {
+            background: linear-gradient(90deg, #1e293b, #0f172a);
+            border: 1px solid rgba(255,255,255,0.1);
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 400px;
+            z-index: 100;
+            border-radius: 1rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const SolMayo = () => (
+            <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-[0_0_8px_#F6B40E]">
+                <circle cx="50" cy="50" r="18" fill="#F6B40E" />
+                {[...Array(16)].map((_, i) => (
+                    <line 
+                        key={i}
+                        x1="50" y1="50" 
+                        x2="50" y2="15" 
+                        stroke="#F6B40E" 
+                        strokeWidth="3" 
+                        strokeLinecap="round"
+                        transform={`rotate(${i * 22.5} 50 50)`}
+                    />
+                ))}
+            </svg>
+        );
+
+        const Icon = ({ name, className }) => {
+            useEffect(() => { if(window.lucide) lucide.createIcons(); }, [name]);
+            return <i data-lucide={name} className={className}></i>;
+        };
+
+        const App = () => {
+            const BRAND = "REDERAR";
+
+            const [temp, setTemp] = useState(58.6);
+            const [isResistorOn, setIsResistorOn] = useState(false);
+            const [dailySavings, setDailySavings] = useState(0.0);
+            const [co2AvoidedDaily, setCo2AvoidedDaily] = useState(0.0);
+            
+            const [showCalc, setShowCalc] = useState(false);
+            const [people, setPeople] = useState('');
+            const [isPump, setIsPump] = useState('');
+            const [hasChildren, setHasChildren] = useState('');
+            const [calcResult, setCalcResult] = useState(null);
+            const [deferredPrompt, setDeferredPrompt] = useState(null);
+
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    setTemp(prev => {
+                        const next = prev + (Math.random() * 0.4 - 0.2);
+                        setIsResistorOn(next < 45);
+                        return parseFloat(next.toFixed(1));
+                    });
+                }, 5000);
+
+                window.addEventListener('beforeinstallprompt', (e) => {
+                    e.preventDefault();
+                    setDeferredPrompt(e);
+                });
+
+                return () => clearInterval(interval);
+            }, []);
+
+            const handleInstall = async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') setDeferredPrompt(null);
+                }
+            };
+
+            const calculate = () => {
+                const p = parseInt(people);
+                if (isNaN(p) || p <= 0 || !isPump || !hasChildren) return;
+
+                const result = p * 50;
+                setCalcResult(result);
+                
+                setDailySavings((result * 0.04).toFixed(2));
+                setCo2AvoidedDaily((result * 0.02).toFixed(2));
+            };
+
+            const handleWhatsApp = () => {
+                let msg = `Hola! Solicito asesoramiento especializado de ${BRAND}.`;
+                if (calcResult) {
+                    msg += ` El simulador indico un dimensionamiento de ${calcResult} litros para ${people} personas.`;
+                    if (hasChildren === 'si') msg += ` Incluir presupuesto por valvula termostatica de seguridad.`;
+                }
+                window.open(`https://wa.me/543434802264?text=${encodeURIComponent(msg)}`, '_blank');
+            };
+
+            return (
+                <div className="min-h-screen p-6 max-w-lg mx-auto fade-in relative">
+                    
+                    {deferredPrompt && (
+                        <div className="install-prompt p-4 flex items-center justify-between shadow-2xl border-blue-500/30" style={{display: 'flex'}}>
+                            <div className="flex items-center gap-3">
+                                <Icon name="download" className="text-blue-400 w-5 h-5" />
+                                <span className="text-[10px] font-bold uppercase tracking-widest">Instalar App Oficial</span>
+                            </div>
+                            <button onClick={handleInstall} className="bg-blue-600 px-4 py-2 rounded-lg text-[10px] font-black uppercase">Instalar</button>
+                        </div>
+                    )}
+
+                    <div className="legal-badges text-right">
+                        <p className="legal-text">PROPIEDAD INTELECTUAL</p>
+                        <p className="legal-text">REG. MARCA MD0232</p>
+                        <p className="legal-text">ALL RIGHTS RESERVED</p>
+                    </div>
+
+                    <div className="flex flex-col items-center pt-14 pb-12">
+                        <div className="rederar-container">
+                            <div className="rederar-sun"></div>
+                            <div className="rederar-sun-core">
+                                <SolMayo />
+                            </div>
+                            <h1 className="rederar-logo leading-none select-none">{BRAND}</h1>
+                        </div>
+                        <p className="text-[#74ACDF] text-[10px] font-black tracking-[0.4em] mt-3 uppercase text-center opacity-90">
+                            Industria Argentina - Energia Solar
+                        </p>
+                    </div>
+
+                    <div className="main-card p-6 mb-8 shadow-2xl">
+                        <div className="flex items-center gap-3 mb-6">
+                            <Icon name="zap" className="text-blue-400 w-5 h-5" />
+                            <h2 className="text-xl font-bold tracking-tight text-white/90">Estado del Sistema</h2>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                            <div className="inner-card p-5">
+                                <p className="text-[10px] text-zinc-500 font-bold uppercase mb-2 tracking-widest">Resistencia</p>
+                                <p className={`text-sm font-black ${isResistorOn ? 'text-green-500' : 'text-red-500'}`}>
+                                    {isResistorOn ? 'ONLINE' : 'OFFLINE'}
+                                </p>
+                            </div>
+                            <div className="inner-card p-5">
+                                <p className="text-[10px] text-zinc-500 font-bold uppercase mb-2 tracking-widest">Temp. Agua</p>
+                                <p className="text-xl font-black glow-text-orange">{temp}&deg;<span className="text-xs ml-0.5 font-bold">C</span></p>
+                            </div>
+                        </div>
+
+                        <div className="inner-card p-5 mb-4 flex justify-between items-center">
+                            <div>
+                                <p className="text-[10px] text-zinc-500 font-bold uppercase mb-1 tracking-widest">Ahorro Diario</p>
+                                <p className="text-2xl font-black text-[#B4E12F]">{dailySavings} <span className="text-sm font-bold opacity-60">kWh</span></p>
+                            </div>
+                            <Icon name="droplets" className="text-[#B4E12F] w-8 h-8 opacity-30" />
+                        </div>
+
+                        <div className="inner-card p-5 flex justify-between items-center">
+                            <div>
+                                <p className="text-[10px] text-zinc-500 font-bold uppercase mb-1 tracking-widest">CO2 Evitado</p>
+                                <p className="text-2xl font-black text-[#00D1FF]">{co2AvoidedDaily} <span className="text-sm font-bold opacity-60">kg</span></p>
+                            </div>
+                            <Icon name="leaf" className="text-[#00D1FF] w-8 h-8 opacity-30" />
+                        </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        <button 
+                            onClick={() => setShowCalc(!showCalc)}
+                            className="btn-calc w-full py-5 flex items-center justify-center gap-4 text-white font-bold text-sm tracking-[0.1em] active:scale-[0.98] transition-all"
+                        >
+                            <Icon name="calculator" className="w-5 h-5" />
+                            CALCULAR DIMENSIONAMIENTO
+                        </button>
+
+                        {showCalc && (
+                            <div className="main-card p-8 space-y-6 fade-in border-white/10 mt-2">
+                                <div>
+                                    <label className="text-[10px] text-zinc-400 font-bold uppercase ml-2 tracking-widest">Personas en el hogar</label>
+                                    <input 
+                                        type="number" 
+                                        className="w-full bg-black/40 border border-white/5 p-4 rounded-2xl mt-1 outline-none focus:border-blue-500/50 text-white font-bold" 
+                                        placeholder="Ej: 4"
+                                        value={people}
+                                        onChange={(e)=>setPeople(e.target.value)}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-[10px] text-zinc-400 font-bold uppercase ml-2 tracking-widest">Menores de 10 años</label>
+                                    <select 
+                                        className="w-full bg-black/40 border border-white/5 p-4 rounded-2xl mt-1 outline-none text-white font-bold appearance-none"
+                                        value={hasChildren}
+                                        onChange={(e)=>setHasChildren(e.target.value)}
+                                    >
+                                        <option value="">Seleccionar...</option>
+                                        <option value="si">SI, hay menores</option>
+                                        <option value="no">NO, solo adultos</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="text-[10px] text-zinc-400 font-bold uppercase ml-2 tracking-widest">Bomba Presurizadora</label>
+                                    <select 
+                                        className="w-full bg-black/40 border border-white/5 p-4 rounded-2xl mt-1 outline-none text-white font-bold appearance-none"
+                                        value={isPump}
+                                        onChange={(e)=>setIsPump(e.target.value)}
+                                    >
+                                        <option value="">Seleccionar...</option>
+                                        <option value="si">SI, tiene bomba</option>
+                                        <option value="no">NO, funciona por gravedad</option>
+                                    </select>
+                                </div>
+                                <button 
+                                    onClick={calculate} 
+                                    className="w-full bg-white text-black py-4 rounded-xl font-black text-sm active:scale-95 transition-all uppercase tracking-widest"
+                                >
+                                    Procesar Datos
+                                </button>
+                                {calcResult && (
+                                    <div className="space-y-4 fade-in">
+                                        <div className="text-center p-6 bg-blue-500/10 rounded-3xl border border-blue-500/20">
+                                            <p className="text-[10px] text-blue-400 font-bold uppercase mb-2 tracking-widest">Capacidad Requerida</p>
+                                            <p className="text-5xl font-black text-white">{calcResult}L</p>
+                                        </div>
+                                        {hasChildren === 'si' && (
+                                            <div className="p-4 bg-orange-500/10 rounded-2xl border border-orange-500/30 flex items-start gap-3">
+                                                <Icon name="alert-triangle" className="text-orange-500 w-5 h-5 shrink-0 mt-0.5" />
+                                                <p className="text-[9px] text-orange-200 uppercase font-black leading-tight tracking-tight">
+                                                    Recomendacion de Seguridad: Se sugiere instalar VALVULA TERMOSTATICA para evitar quemaduras accidentales en menores.
+                                                </p>
+                                            </div>
+                                        )}
+                                        {isPump === 'si' && (
+                                            <p className="text-[8px] text-zinc-400 text-center uppercase font-bold tracking-tighter italic opacity-60">Nota: Se requiere modelo presurizable</p>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        <button 
+                            onClick={handleWhatsApp}
+                            className="btn-wa w-full py-5 flex items-center justify-center gap-4 text-white font-bold text-sm tracking-[0.1em] active:scale-[0.98] transition-all"
+                        >
+                            <Icon name="message-circle" className="w-6 h-6" />
+                            ASESORAMIENTO DIRECTO
+                        </button>
+                    </div>
+
+                    <footer className="mt-16 pb-12 text-center opacity-40">
+                        <p className="text-[8px] font-bold tracking-[0.6em] text-zinc-400 uppercase">
+                            Simulador Tecnico v4.3 - {BRAND} Argentina
+                        </p>
+                        <p className="text-[7px] font-medium tracking-[0.3em] text-zinc-500 uppercase mt-3">
+                            2026 Todos los derechos reservados
+                        </p>
+                    </footer>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
+
+
